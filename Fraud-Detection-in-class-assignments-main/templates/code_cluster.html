@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Code Cluster Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --danger: #ef476f;
+            --warning: #ffd166;
+            --success: #06d6a0;
+            --info: #118ab2;
+            --dark: #2b2d42;
+            --gray: #8d99ae;
+            --light: #f8f9fa;
+            --light-gray: #edf2f4;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 1rem 2rem;
+            color: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .navbar-menu {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Dashboard Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0 1.5rem;
+        }
+        
+        .dashboard-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        /* Card Styling */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        
+        /* File Input styling */
+        .file-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            text-align: center;
+            border: 2px dashed var(--gray);
+        }
+        
+        .file-input-label:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        /* Button Styling */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+            min-width: 150px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .btn-secondary {
+            background: var(--gray);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--dark);
+            transform: translateY(-3px);
+        }
+        
+        .btn-pdf {
+            background: #ef476f;
+            color: white;
+        }
+        
+        .btn-pdf:hover {
+            background: #d43d63;
+            transform: translateY(-2px);
+        }
+        
+        /* File List Styling */
+        .file-list {
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .file-item {
+            padding: 0.8rem 1rem;
+            margin: 0;
+            background: var(--light);
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-item:before {
+            content: '\f15b';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .file-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .file-item-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .file-item-actions .remove-btn:hover {
+            color: var(--danger);
+        }
+        
+        /* Loading and Message Styling */
+        .loading {
+            display: none;
+            padding: 1rem;
+            color: var(--primary);
+            font-weight: bold;
+            text-align: center;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .loading i {
+            margin-right: 10px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .message {
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .message-success {
+            background-color: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(6, 214, 160, 0.3);
+        }
+        
+        .message-error {
+            background-color: rgba(239, 71, 111, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 71, 111, 0.3);
+        }
+        
+        /* Clusters Styling */
+        .cluster-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+            border-left: 5px solid var(--primary);
+        }
+        
+        .cluster-card:hover {
+            box-shadow: var(--shadow);
+        }
+        
+        .cluster-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .cluster-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .similarity-badge {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .cluster-files {
+            margin-top: 0.5rem;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--light-gray);
+        }
+        
+        /* Stats Styling */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        /* Modal Styling */
+        .modal {
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            padding: 1rem;
+            transition: var(--transition);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 0.5rem;
+            cursor: move; /* Indicates draggable area */
+        }
+        
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--danger);
+            font-size: 1.2rem;
+        }
+        
+        .modal-body {
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .modal {
+                width: 80%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            .navbar-menu {
+                display: none;
+            }
+            #pdfDownload {
+                text-align: center;
+                margin: 2rem 0;
+            }
+            .modal {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <i class="fas fa-code-branch"></i>
+                Code Cluster Analysis
+            </div>
+            <div class="navbar-menu">
+                <a href="{{ url_for('index') }}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">Python Code Cluster Analysis</div>
+        </div>
+        
+        <!-- Upload Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-upload" style="color: var(--primary);"></i>
+                    Upload Python Files
+                </div>
+            </div>
+            
+            <div class="file-input-container">
+                <div class="file-input-wrapper">
+                    <label class="file-input-label">
+                        <i class="fas fa-folder-open"></i>
+                        Select a folder containing Python files
+                    </label>
+                    <input type="file" id="codeInput" class="file-input" webkitdirectory directory multiple accept=".py">
+                </div>
+                <div class="file-input-wrapper">
+                    <label class="file-input-label">
+                        <i class="fas fa-plus-circle"></i>
+                        Add more Python files
+                    </label>
+                    <input type="file" id="addFilesInput" class="file-input" multiple accept=".py">
+                </div>
+                
+                <button id="analyzeBtn" onclick="analyzeCode()" class="btn btn-primary">
+                    <i class="fas fa-cogs"></i>
+                    Analyze Files
+                </button>
+            </div>
+            
+            <div id="uploadMessage" class="message message-success" style="display: none;">
+                <i class="fas fa-check-circle"></i> Files uploaded successfully!
+            </div>
+        </div>
+        
+        <!-- Uploaded Files -->
+        <div id="uploadedFiles" class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-file-code" style="color: var(--primary);"></i>
+                    Uploaded Files <span id="fileCount">(0)</span>
+                </div>
+            </div>
+            
+            <ul class="file-list" id="fileList">
+                <li class="file-item">No files uploaded.</li>
+            </ul>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner"></i> Processing, please wait...
+        </div>
+        
+        <!-- Stats Container - Will show after analysis -->
+        <div id="statsContainer" class="stats-container" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="stat-value" id="clusterCount">0</div>
+                <div class="stat-label">Total Clusters</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-file-code"></i>
+                </div>
+                <div class="stat-value" id="fileTotal">0</div>
+                <div class="stat-label">Files Analyzed</div>
+            </div>
+        </div>
+        
+        <!-- Results Container -->
+        <div id="results"></div>
+        
+        <!-- PDF Download Button -->
+        <div id="pdfDownload" style="margin-top: 20px; display: none;">
+            <button onclick="generatePDF()" class="btn btn-pdf">
+                <i class="fas fa-file-pdf"></i> Download PDF Report
+            </button>
+        </div>
+        
+        <!-- PDF Error Message -->
+        <div id="pdfError" class="message message-error" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Global variables to store file contents, modal count, and selected files
+        let fileContents = {};
+        let modalCount = 0;
+        let selectedFiles = new Map(); // Map to store files (key: file name, value: File object)
+
+        // Display uploaded files and store their contents
+        function displayUploadedFiles(files, isAddMore = false) {
+            const fileContainer = document.querySelector("#uploadedFiles .file-list");
+            const fileCount = document.getElementById("fileCount");
+            const uploadMessage = document.getElementById("uploadMessage");
+
+            // If not adding more files, clear the existing list
+            if (!isAddMore) {
+                selectedFiles.clear();
+                fileContents = {};
+                fileContainer.innerHTML = '';
+            }
+
+            // Add new files to the selectedFiles Map
+            Array.from(files).forEach(file => {
+                const filePath = file.webkitRelativePath || file.name;
+                selectedFiles.set(filePath, file);
+            });
+
+            // Update file count
+            fileCount.textContent = `(${selectedFiles.size})`;
+
+            if (selectedFiles.size === 0) {
+                fileContainer.innerHTML = '<li class="file-item">No files uploaded.</li>';
+                uploadMessage.style.display = "none";
+                return;
+            }
+
+            // Show upload success message
+            uploadMessage.style.display = "block";
+            setTimeout(() => {
+                uploadMessage.style.display = "none";
+            }, 3000);
+
+            // Display the updated list of files
+            fileContainer.innerHTML = '';
+            selectedFiles.forEach((file, filePath) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'file-item';
+                listItem.innerHTML = `
+                    <span>${filePath}</span>
+                    <div class="file-item-actions">
+                        <button class="remove-btn" onclick="removeFile('${filePath}')">
+                            <i class="fas fa-trash-alt" style="color: var(--gray);"></i>
+                        </button>
+                    </div>
+                `;
+
+                // Read and store file content if not already stored
+                if (!fileContents[filePath]) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        fileContents[filePath] = reader.result;
+                    };
+                    reader.readAsText(file);
+                }
+
+                fileContainer.appendChild(listItem);
+            });
+        }
+
+        // Remove a file from the list
+        function removeFile(filePath) {
+            // Remove from selectedFiles and fileContents
+            selectedFiles.delete(filePath);
+            delete fileContents[filePath];
+
+            // Update the displayed list
+            displayUploadedFiles(selectedFiles.values(), true);
+
+            // Reset the file input to reflect the updated file list
+            updateFileInput();
+        }
+
+        // Update the file input to reflect the current selectedFiles
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            document.getElementById('codeInput').files = dataTransfer.files;
+        }
+
+        // Analyze code
+        async function analyzeCode() {
+            if (selectedFiles.size === 0) {
+                alert('Please select at least one Python file');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('statsContainer').style.display = 'none';
+            document.getElementById('pdfDownload').style.display = 'none';
+            document.getElementById('pdfError').style.display = 'none';
+
+            const readFile = (file) => new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve({
+                    name: file.webkitRelativePath || file.name,
+                    content: e.target.result
+                });
+                reader.readAsText(file);
+            });
+
+            try {
+                const filesData = await Promise.all(Array.from(selectedFiles.values()).map(readFile));
+                console.log("Selected files:", filesData);
+
+                const response = await fetch('/cluster_python_folder/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: filesData })
+                });
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("Response from backend:", data);
+                
+                // Show stats and results
+                updateStats(data.clusters, filesData.length);
+                displayResults(data.clusters);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                
+                // Display error in results
+                const container = document.getElementById('results');
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Analysis failed. Please try again.</p>
+                        <p class="text-sm" style="color: var(--gray); font-size: 0.9rem;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update statistics
+        function updateStats(clusters, totalFiles) {
+            document.getElementById('statsContainer').style.display = 'grid';
+            document.getElementById('clusterCount').textContent = clusters.length;
+            document.getElementById('fileTotal').textContent = totalFiles;
+        }
+
+        // Display results with clickable files
+        function displayResults(clusters) {
+            const container = document.getElementById('results');
+            container.innerHTML = '';
+
+            if (!clusters || clusters.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <p>No clusters found</p>
+                        <p style="color: var(--gray); font-size: 0.9rem;">Try uploading a different set of files</p>
+                    </div>
+                `;
+                document.getElementById('pdfDownload').style.display = 'none';
+                return;
+            }
+
+            // Create results header
+            const resultsHeader = document.createElement('div');
+            resultsHeader.className = 'dashboard-header';
+            resultsHeader.innerHTML = `
+                <div class="dashboard-title" style="font-size: 1.5rem;">
+                    <i class="fas fa-layer-group" style="color: var(--primary); margin-right: 10px;"></i>
+                    Identified Clusters
+                </div>
+            `;
+            container.appendChild(resultsHeader);
+
+            // Sort clusters by similarity (descending)
+            clusters.sort((a, b) => {
+                if (a.similarity === undefined && b.similarity === undefined) return 0;
+                if (a.similarity === undefined) return 1;
+                if (b.similarity === undefined) return -1;
+                return b.similarity - a.similarity;
+            });
+
+            // Resequence cluster IDs for display
+            const resequencedClusters = clusters.map((cluster, index) => ({
+                ...cluster,
+                display_id: index // Add a display_id for sequential numbering
+            }));
+
+            // Display each cluster with resequenced IDs
+            resequencedClusters.forEach(cluster => {
+                const clusterDiv = document.createElement('div');
+                clusterDiv.className = 'cluster-card';
+                
+                let borderColor = 'var(--primary)';
+                if (cluster.similarity !== undefined) {
+                    const similarity = parseFloat(cluster.similarity);
+                    if (similarity > 90) {
+                        borderColor = 'var(--danger)';
+                    } else if (similarity > 75) {
+                        borderColor = 'var(--warning)';
+                    } else if (similarity > 50) {
+                        borderColor = 'var(--info)';
+                    }
+                }
+                clusterDiv.style.borderLeftColor = borderColor;
+                
+                clusterDiv.innerHTML = `
+                    <div class="cluster-header">
+                        <div class="cluster-title">
+                            <i class="fas fa-object-group" style="color: ${borderColor};"></i>
+                            Cluster ${cluster.display_id}
+                        </div>
+                        ${cluster.similarity !== undefined ? `
+                            <div class="similarity-badge" style="background-color: ${borderColor}20; color: ${borderColor};">
+                                ${cluster.similarity}% similarity
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="cluster-content">
+                        <div>Contains ${cluster.names.length} similar files:</div>
+                        <ul class="file-list cluster-files">
+                            ${cluster.names.map(name => `
+                                <li class="file-item" onclick="showFileContent('${name}')" style="cursor: pointer;">
+                                    ${name}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+                container.appendChild(clusterDiv);
+            });
+
+            document.getElementById('pdfDownload').style.display = 'block';
+        }
+
+        // Function to display file content in a modal
+        function showFileContent(fileName) {
+            if (!fileContents[fileName]) {
+                alert("Content not available for " + fileName);
+                return;
+            }
+
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = `modal-${modalCount++}`;
+            
+            // Position modal within viewport
+            const viewportWidth = window.innerWidth;
+            const modalWidth = 300; // Matches CSS width
+            const maxLeft = viewportWidth - modalWidth - 20; // 20px padding from right edge
+            let leftPosition = 20 + ((modalCount - 1) % 4) * (modalWidth + 10); // 4 modals per row, 10px gap
+            leftPosition = Math.min(leftPosition, maxLeft); // Ensure it stays within viewport
+            const topPosition = 50 + Math.floor((modalCount - 1) / 4) * (modalWidth + 10); // Stack rows vertically
+
+            modal.style.left = `${leftPosition}px`;
+            modal.style.top = `${topPosition}px`;
+
+            modal.innerHTML = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i class="fas fa-file-alt" style="color: var(--primary);"></i>
+                        ${fileName}
+                    </div>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ${fileContents[fileName]}
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Make modal draggable
+            makeDraggable(modal);
+        }
+
+        // Function to make modals draggable
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            const header = element.querySelector('.modal-header');
+
+            header.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+
+                // Calculate new position
+                let newTop = element.offsetTop - pos2;
+                let newLeft = element.offsetLeft - pos1;
+
+                // Constrain within viewport
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const modalWidth = element.offsetWidth;
+                const modalHeight = element.offsetHeight;
+
+                newTop = Math.max(0, Math.min(newTop, viewportHeight - modalHeight));
+                newLeft = Math.max(0, Math.min(newLeft, viewportWidth - modalWidth));
+
+                element.style.top = newTop + "px";
+                element.style.left = newLeft + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        // Generate PDF
+        function generatePDF() {
+            const clusters = Array.from(document.querySelectorAll('.cluster-card')).map(cluster => {
+                const clusterData = {
+                    cluster_id: cluster.querySelector('.cluster-title').textContent.replace('Cluster ', '').trim(),
+                    names: Array.from(cluster.querySelectorAll('.file-item')).map(li => li.textContent.trim())
+                };
+                const similarityElement = cluster.querySelector('.similarity-badge');
+                if (similarityElement) {
+                    clusterData.similarity = similarityElement.textContent.match(/\d+(\.\d+)?/)[0];
+                }
+                return clusterData;
+            });
+
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('pdfError').style.display = 'none';
+
+            fetch('/generate_cluster_pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ clusters: clusters })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                document.getElementById('loading').style.display = 'none';
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cluster_report.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                const pdfError = document.getElementById('pdfError');
+                pdfError.textContent = `Error generating PDF: ${error.message}`;
+                pdfError.style.display = 'block';
+            });
+        }
+
+        // Event listeners for file inputs
+        document.getElementById('codeInput').addEventListener('change', function() {
+            displayUploadedFiles(this.files, false);
+        });
+
+        document.getElementById('addFilesInput').addEventListener('change', function() {
+            if (this.files.length > 0) {
+                displayUploadedFiles(this.files, true);
+            }
+        });
+    </script>
+</body>
+</html>

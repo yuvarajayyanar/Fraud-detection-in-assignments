@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fraud Detector | Home</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #1a73e8;
+        --primary-dark: #0d47a1;
+        --secondary: #2a9d8f;
+        --danger: #e63946;
+        --success: #43a047;
+        --warning: #ffa000;
+        --gray-light: #f5f7fa;
+        --gray: #e0e0e0;
+        --gray-dark: #757575;
+        --dark: #263238;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: rgb(227, 242, 255);
+        color: var(--dark);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .navbar {
+        background-color: #1a73e8; /* Updated primary color */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .navbar-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+        padding: 15px 0;
+      }
+
+      .navbar-brand h1 {
+        color: white;
+        font-size: 1.5rem;
+        margin-left: 10px;
+      }
+
+      .navbar-brand i {
+        font-size: 1.8rem;
+        color: white;
+      }
+
+      .navbar-menu {
+        display: flex;
+        gap: 20px;
+      }
+
+      .navbar-menu a {
+        color: white;
+        text-decoration: none;
+        padding: 15px 15px;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .navbar-menu a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .navbar-menu a.active {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 30px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .page-title {
+        margin-bottom: 20px;
+        text-align: center;
+        color: var(--primary-dark);
+      }
+
+      .input-panel {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+        margin-bottom: 30px;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .panel-heading {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .nav-tabs {
+        display: flex;
+        list-style: none;
+        border-bottom: 1px solid var(--gray);
+        margin-bottom: 15px;
+      }
+
+      .nav-item {
+        margin-right: 5px;
+      }
+
+      .nav-link {
+        display: block;
+        padding: 10px 15px;
+        color: var(--dark);
+        text-decoration: none;
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .nav-link.active {
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+        font-weight: 500;
+      }
+
+      .tab-content {
+        padding: 15px 0;
+      }
+
+      .tab-pane {
+        display: none;
+      }
+
+      .tab-pane.active {
+        display: block;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      textarea {
+        width: 90%;
+        height: 170px;
+        padding: 15px;
+        border: 1px solid var(--gray);
+        border-radius: 8px;
+        font-size: 1rem;
+        resize: none;
+        font-family: inherit;
+        transition: border 0.3s ease;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 2px rgba(42, 157, 143, 0.2);
+      }
+
+      input[type="file"] {
+        padding: 15px;
+        background-color: white;
+        border: 1px solid var(--gray);
+        border-radius: 8px;
+        width: 90%;
+        margin: 0 auto;
+        display: block;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 15px;
+        background-color: var(--secondary);
+        color: white;
+      }
+
+      .btn:hover {
+        background-color: #238b7e;
+      }
+
+      .button-group {
+        text-align: center;
+      }
+
+      .results-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        margin-top: 40px;
+      }
+
+      .results-panel {
+        flex: 1;
+        min-width: 300px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+      }
+
+      .results-header {
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--gray);
+        text-align: center;
+        color: var(--primary-dark);
+      }
+
+      .results-list {
+        list-style: none;
+      }
+
+      .results-list li {
+        padding: 10px 0;
+        border-bottom: 1px solid var(--gray-light);
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .score-result {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .score-circle {
+        font-size: 35px;
+        color: var(--primary-dark);
+        width: 155px;
+        height: 155px;
+        border: 7px solid var(--secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .score-label {
+        font-size: 1.2rem;
+        color: var(--gray-dark);
+        text-align: center;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .navbar-container {
+          flex-direction: column;
+          padding: 10px;
+        }
+
+        .navbar-brand {
+          margin-bottom: 10px;
+          margin-right: 0;
+        }
+
+        .navbar-menu {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .results-container {
+          flex-direction: column;
+        }
+
+        .input-panel,
+        .results-panel {
+          padding: 20px;
+        }
+
+        textarea,
+        input[type="file"] {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <nav class="navbar">
+        <div class="navbar-container">
+          <div class="navbar-brand">
+            <i class="fas fa-shield-alt"></i>
+            <h1>Fraud Detector</h1>
+          </div>
+          <div class="navbar-menu">
+            <a href="{{ url_for('index') }}" class="active"
+              ><i class="fas fa-home"></i> Home</a
+            >
+          </div>
+        </div>
+      </nav>
+
+      <main class="main-content">
+        <h1 class="page-title">Plagiarism Checker</h1>
+
+        <section class="input-panel">
+          <div class="panel-heading">
+            <p>Choose a file or enter text for web search!</p>
+          </div>
+
+          <ul class="nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                id="text-tab"
+                data-toggle="tab"
+                href="#text-input-ws"
+                role="tab"
+                aria-controls="text-input-ws"
+                aria-selected="true"
+                >Text</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                id="file-tab"
+                data-toggle="tab"
+                href="#file-input-ws"
+                role="tab"
+                aria-controls="file-input-ws"
+                aria-selected="false"
+                >File Upload</a
+              >
+            </li>
+          </ul>
+
+          <div class="tab-content" id="myTabContent">
+            <div
+              class="tab-pane fade show active"
+              id="text-input-ws"
+              role="tabpanel"
+              aria-labelledby="text-tab"
+            >
+              <form id="form1-ws" action="{{ url_for('test') }}" method="POST">
+                <div class="form-group">
+                  <textarea
+                    id="text-1"
+                    name="q"
+                    required
+                    placeholder="Enter the text you want to check for fraud..."
+                  ></textarea>
+                </div>
+                <div class="button-group">
+                  <button type="submit" id="submit-button-1" class="btn">
+                    <i class="fas fa-search"></i> Run Search
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div
+              class="tab-pane fade"
+              id="file-input-ws"
+              role="tabpanel"
+              aria-labelledby="file-tab"
+            >
+              <form
+                id="form2-ws"
+                action="{{ url_for('file_test') }}"
+                enctype="multipart/form-data"
+                method="POST"
+              >
+                <div class="form-group">
+                  <input id="id_docfile" required type="file" name="docfile" />
+                </div>
+                <div class="button-group">
+                  <button type="submit" id="submit-button-2" class="btn">
+                    <i class="fas fa-search"></i> Run Search
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section class="results-container">
+          <div class="results-panel">
+            <h3 class="results-header">Matching Sources</h3>
+            <ul class="results-list">
+              {% for url, score in link.items() %}
+              <li>
+                <span>{{ url }}</span>
+                <strong>{{ score|round(2) }}%</strong>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div class="results-panel score-result">
+            {% if percent is defined %}
+            <div class="score-circle">{{ percent }}%</div>
+            <div class="score-label">Plagiarism percentage</div>
+            {% else %}
+            <div class="score-circle">-%</div>
+            <div class="score-label">Submit content to check</div>
+            {% endif %}
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // Tab switching functionality
+      document.addEventListener('DOMContentLoaded', function() {
+        // Get all tab links
+        const tabLinks = document.querySelectorAll('.nav-link');
+        
+        // Add click event listeners to each tab
+        tabLinks.forEach(function(tabLink) {
+          tabLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            
+            // Remove active class from all tabs
+            tabLinks.forEach(function(link) {
+              link.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Get the target pane ID from href attribute
+            const targetId = this.getAttribute('href');
+            
+            // Get all tab panes
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            // Hide all tab panes
+            tabPanes.forEach(function(pane) {
+              pane.classList.remove('show', 'active');
+              pane.classList.add('fade');
+            });
+            
+            // Show the target pane
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+              targetPane.classList.add('show', 'active');
+            }
+          });
+        });
+      });
+
+      // Simplified search web function that focuses on just similarity calculation
+      function calculateSimilarity(text1, text2) {
+        if (!text1 || !text2) return 0;
+        
+        // Convert texts to lowercase and split into words
+        const words1 = text1.toLowerCase().split(/\s+/);
+        const words2 = text2.toLowerCase().split(/\s+/);
+        
+        // Count matching words
+        let matchCount = 0;
+        const uniqueWords = new Set(words1);
+        
+        for (const word of words2) {
+          if (uniqueWords.has(word)) {
+            matchCount++;
+            uniqueWords.delete(word); // Avoid counting duplicates
+          }
+        }
+        
+        // Calculate Jaccard similarity coefficient
+        const totalUniqueWords = new Set([...words1, ...words2]).size;
+        const similarity = totalUniqueWords === 0 ? 0 : matchCount / totalUniqueWords;
+        
+        return parseFloat((similarity * 100).toFixed(2));
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection System | AI Content Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #0d47a1;
+            --secondary: #ff6d00;
+            --danger: #e53935;
+            --success: #43a047;
+            --warning: #ffa000;
+            --gray-light: #f5f7fa;
+            --gray: #e0e0e0;
+            --gray-dark: #757575;
+            --dark: #263238;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--gray-light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .navbar {
+            background-color: var(--primary);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .navbar-brand h1 {
+            color: white;
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+        
+        .navbar-brand i {
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .navbar-menu {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 15px 15px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .navbar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .navbar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .page-title {
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--primary-dark);
+        }
+        
+        .page-subtitle {
+            text-align: center;
+            color: var(--gray-dark);
+            margin-bottom: 30px;
+            font-weight: normal;
+        }
+        
+        .detection-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            gap: 10px;
+        }
+        
+        .panel-title i {
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .text-input {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: none;
+            font-family: inherit;
+            transition: border 0.3s ease;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        
+        .input-counter {
+            color: var(--gray-dark);
+            font-size: 0.85rem;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--gray);
+            color: var(--dark);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--gray-dark);
+            color: white;
+        }
+        
+        .btn-advanced {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-advanced:hover {
+            background-color: #e65c00;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .result-title {
+            flex: 1;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .result-badge {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-danger {
+            background-color: rgba(229, 57, 53, 0.1);
+            color: var(--danger);
+        }
+        
+        .badge-success {
+            background-color: rgba(67, 160, 71, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background-color: rgba(255, 160, 0, 0.1);
+            color: var(--warning);
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar-container {
+            height: 8px;
+            background-color: var(--gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .ai-progress {
+            background-color: var(--danger);
+        }
+        
+        .human-progress {
+            background-color: var(--success);
+        }
+        
+        .analysis-details {
+            background-color: var(--gray-light);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .analysis-title {
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--primary-dark);
+        }
+        
+        .analysis-list {
+            list-style-type: none;
+        }
+        
+        .analysis-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .analysis-item i {
+            margin-top: 2px;
+        }
+        
+        .info-icon {
+            color: var(--primary);
+        }
+        
+        .warning-icon {
+            color: var(--warning);
+        }
+        
+        .footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .navbar-brand {
+                margin-bottom: 10px;
+            }
+            
+            .navbar-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .detection-panel, .result-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <div class="navbar-brand">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>Fraud Detector</h1>
+                </div>
+                <div class="navbar-menu">
+                    <a href="{{ url_for('index') }}" class="active"><i class="fas fa-home"></i> Home</a>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <h1 class="page-title">AI Content Detection</h1>
+            <p class="page-subtitle">Identify potentially fraudulent content by analyzing AI-generated patterns and suspicious text markers</p>
+
+            <section class="detection-panel">
+                <h2 class="panel-title"><i class="fas fa-search"></i> Content Analysis</h2>
+                
+                <div class="form-group">
+                    <label for="textInput" class="form-label">Enter text for analysis:</label>
+                    <textarea id="textInput" class="text-input" placeholder="Paste suspicious text, claims, statements, or content that needs verification..."></textarea>
+                    <div class="input-counter">0/5000 characters</div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="analyzeBtn" class="btn btn-primary"><i class="fas fa-robot"></i> Basic Analysis</button>
+                    <button id="refinedAnalyzeBtn" class="btn btn-advanced"><i class="fas fa-microscope"></i> Advanced Detection</button>
+                    <button id="clearBtn" class="btn btn-secondary"><i class="fas fa-trash-alt"></i> Clear</button>
+                </div>
+            </section>
+
+            <section id="resultCard" class="result-card">
+                <div class="result-header">
+                    <h2 class="result-title">Analysis Results</h2>
+                    <span id="resultBadge" class="result-badge badge-warning">Processing</span>
+                </div>
+                
+                
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>AI Probability</span>
+                        <span id="aiPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="aiProgressBar" class="progress-bar ai-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Human Probability</span>
+                        <span id="humanPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="humanProgressBar" class="progress-bar human-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="analysis-details">
+                    <h3 class="analysis-title">Fraud Risk Assessment</h3>
+                    <ul id="analysisList" class="analysis-list">
+                        <!-- Dynamically populated -->
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const textInput = document.getElementById('textInput');
+            const inputCounter = document.querySelector('.input-counter');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const refinedAnalyzeBtn = document.getElementById('refinedAnalyzeBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const resultCard = document.getElementById('resultCard');
+            const resultBadge = document.getElementById('resultBadge');
+            const aiPercentage = document.getElementById('aiPercentage');
+            const humanPercentage = document.getElementById('humanPercentage');
+            const aiProgressBar = document.getElementById('aiProgressBar');
+            const humanProgressBar = document.getElementById('humanProgressBar');
+            const analysisList = document.getElementById('analysisList');
+            
+            // Character counter (unchanged)
+            textInput.addEventListener('input', function() {
+                const length = this.value.length;
+                inputCounter.textContent = `${length}/5000 characters`;
+                if (length > 5000) {
+                    inputCounter.style.color = 'red';
+                    this.value = this.value.substring(0, 5000);
+                    inputCounter.textContent = '5000/5000 characters';
+                } else {
+                    inputCounter.style.color = 'var(--gray-dark)';
+                }
+            });
+            
+            // Clear button (unchanged)
+            clearBtn.addEventListener('click', function() {
+                textInput.value = '';
+                inputCounter.textContent = '0/5000 characters';
+                resultCard.style.display = 'none';
+            });
+            
+            // Basic Analyze button (unchanged)
+            analyzeBtn.addEventListener('click', function() {
+                const text = textInput.value.trim();
+                if (!text) {
+                    alert('Please enter some text for analysis.');
+                    return;
+                }
+                resultCard.style.display = 'block';
+                resultBadge.className = 'result-badge badge-warning';
+                resultBadge.textContent = 'Processing';
+                aiPercentage.textContent = '0%';
+                humanPercentage.textContent = '0%';
+                aiProgressBar.style.width = '0%';
+                humanProgressBar.style.width = '0%';
+                analysisList.innerHTML = '<li class="analysis-item"><i class="fas fa-spinner fa-spin"></i> Analyzing content patterns...</li>';
+                setTimeout(function() {
+                    analyzeContent(text);
+                }, 1500);
+            });
+            
+            // Refined Analysis button
+            refinedAnalyzeBtn.addEventListener('click', function() {
+                const text = textInput.value.trim();
+                if (!text) {
+                    alert('Please enter some text for analysis.');
+                    return;
+                }
+                resultCard.style.display = 'block';
+                resultBadge.className = 'result-badge badge-warning';
+                resultBadge.textContent = 'Processing';
+                aiPercentage.textContent = '0%';
+                humanPercentage.textContent = '0%';
+                aiProgressBar.style.width = '0%';
+                humanProgressBar.style.width = '0%';
+                analysisList.innerHTML = '<li class="analysis-item"><i class="fas fa-spinner fa-spin"></i> Performing advanced AI detection analysis...</li>';
+                
+                fetch('/ai_refined/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayRefinedResults(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    analysisList.innerHTML = `<li class="analysis-item"><i class="fas fa-exclamation-circle warning-icon"></i> <span>Error: ${error.message}</span></li>`;
+                    resultBadge.className = 'result-badge badge-danger';
+                    resultBadge.textContent = 'Error';
+                });
+            });
+            
+            // Keep analyzeContent function unchanged if you want to retain basic analysis
+            function analyzeContent(text) {
+                let aiProb = 0;
+                if (text.length > 1000) aiProb += 0.15;
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                const uniqueSentences = new Set(sentences.map(s => s.trim().toLowerCase()));
+                if (sentences.length > uniqueSentences.size) aiProb += 0.1;
+                const formalWords = ['furthermore', 'moreover', 'thus', 'therefore', 'consequently', 'subsequently'];
+                const formalCount = formalWords.filter(word => text.toLowerCase().includes(word)).length;
+                aiProb += (formalCount / formalWords.length) * 0.2;
+                const sentenceLengths = sentences.map(s => s.length);
+                const avgLength = sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length;
+                const variance = sentenceLengths.reduce((a, b) => a + Math.pow(b - avgLength, 2), 0) / sentenceLengths.length;
+                const stdDev = Math.sqrt(variance);
+                if (stdDev < 10 && sentences.length > 5) aiProb += 0.15;
+                aiProb += Math.random() * 0.4;
+                aiProb = Math.min(Math.max(aiProb, 0), 1);
+                const aiPercent = Math.round(aiProb * 100);
+                const humanPercent = 100 - aiPercent;
+                aiPercentage.textContent = `${aiPercent}%`;
+                humanPercentage.textContent = `${humanPercent}%`;
+                aiProgressBar.style.width = `${aiPercent}%`;
+                humanProgressBar.style.width = `${humanPercent}%`;
+                if (aiPercent >= 75) {
+                    resultBadge.className = 'result-badge badge-danger';
+                    resultBadge.textContent = 'High Risk';
+                } else if (aiPercent >= 50) {
+                    resultBadge.className = 'result-badge badge-warning';
+                    resultBadge.textContent = 'Medium Risk';
+                } else {
+                    resultBadge.className = 'result-badge badge-success';
+                    resultBadge.textContent = 'Low Risk';
+                }
+                let analysisItems = [];
+                if (aiPercent >= 75) {
+                    analysisItems.push('<i class="fas fa-exclamation-triangle warning-icon"></i> <span>High probability of AI-generated content.</span>');
+                } else if (aiPercent >= 50) {
+                    analysisItems.push('<i class="fas fa-exclamation-circle warning-icon"></i> <span>Moderate indicators of AI assistance.</span>');
+                } else {
+                    analysisItems.push('<i class="fas fa-check-circle info-icon"></i> <span>Content appears human-written.</span>');
+                }
+                analysisList.innerHTML = analysisItems.map(item => `<li class="analysis-item">${item}</li>`).join('');
+            }
+            
+            // Updated displayRefinedResults function
+            function displayRefinedResults(data) {
+                try {
+                    analysisList.innerHTML = '';
+                    if (data.error) {
+                        analysisList.innerHTML = `<li class="analysis-item"><i class="fas fa-exclamation-circle warning-icon"></i> ${data.error}</li>`;
+                        resultBadge.className = 'result-badge badge-danger';
+                        resultBadge.textContent = 'Error';
+                        return;
+                    }
+
+                    const aiScore = data.ai_score || 0;
+                    const prediction = data.prediction || "Unknown";
+                    const details = data.details || {};
+
+                    const aiPercent = Math.round(aiScore * 100);
+                    const humanPercent = 100 - aiPercent;
+
+                    aiPercentage.textContent = `${aiPercent}%`;
+                    humanPercentage.textContent = `${humanPercent}%`;
+                    aiProgressBar.style.width = `${aiPercent}%`;
+                    humanProgressBar.style.width = `${humanPercent}%`;
+
+                    if (aiPercent >= 75) {
+                        resultBadge.className = 'result-badge badge-danger';
+                        resultBadge.textContent = 'High Risk';
+                    } else if (aiPercent >= 50) {
+                        resultBadge.className = 'result-badge badge-warning';
+                        resultBadge.textContent = 'Medium Risk';
+                    } else {
+                        resultBadge.className = 'result-badge badge-success';
+                        resultBadge.textContent = 'Low Risk';
+                    }
+
+                    const analysisItems = [
+                        `<i class="fas fa-robot info-icon"></i> Prediction: ${prediction}`,
+                        `<i class="fas fa-percentage info-icon"></i> AI Probability: ${aiPercent}%`,
+                        `<i class="fas fa-info-circle info-icon"></i> Confidence: ${details.confidence || 'N/A'}`
+                    ];
+
+                    if (details.model_name) {
+                        analysisItems.push(`<i class="fas fa-microchip info-icon"></i> Model: ${details.model_name}`);
+                    }
+
+                    analysisList.innerHTML = analysisItems.map(item => 
+                        `<li class="analysis-item">${item}</li>`
+                    ).join('');
+
+                } catch (error) {
+                    analysisList.innerHTML = `<li class="analysis-item"><i class="fas fa-exclamation-circle warning-icon"></i> Error processing results: ${error.message}</li>`;
+                    resultBadge.className = 'result-badge badge-danger';
+                    resultBadge.textContent = 'Error';
+                    console.error('Display error:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

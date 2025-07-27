@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trend Analysis - Academic Integrity Monitor</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      :root {
+        --primary: #1a73e8;
+        --primary-dark: #0d47a1;
+        --secondary: #2a9d8f;
+        --danger: #e63946;
+        --success: #43a047;
+        --warning: #ffa000;
+        --gray-light: #f5f7fa;
+        --gray: #e0e0e0;
+        --gray-dark: #757575;
+        --dark: #263238;
+      }
+
+      @media print {
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    
+    .card-shadow {
+      box-shadow: none !important;
+    }
+    
+    .assignment-card {
+      page-break-inside: avoid;
+    }
+  }
+  
+  /* Additional style for the download button */
+  #download-pdf {
+    background-color: white;
+    color: #1a73e8;
+    border: 1px solid #1a73e8;
+    transition: all 0.3s ease;
+  }
+  
+  #download-pdf:hover {
+    background-color: #f0f7ff;
+  }
+
+      .bg-gradient {
+        background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+      }
+      .card-shadow {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .assignment-card {
+        transition: all 0.3s ease;
+      }
+      .assignment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .collapsible-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-out;
+      }
+      .expanded {
+        max-height: 2000px;
+        transition: max-height 0.5s ease-in;
+      }
+      .loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border-left-color: #4b6cb7;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .tooltip {
+        position: relative;
+        display: inline-block;
+      }
+      .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
+      .tab-active {
+        border-bottom: 3px solid #4b6cb7;
+        color: #4b6cb7;
+      }
+
+      /* Navbar styles from fraud detector */
+      .navbar {
+        background-color: #1a73e8;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .navbar-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+        padding: 15px 0;
+      }
+
+      .navbar-brand h1 {
+        color: white;
+        font-size: 1.5rem;
+        margin-left: 10px;
+      }
+
+      .navbar-brand i {
+        font-size: 1.8rem;
+        color: white;
+      }
+
+      .navbar-menu {
+        display: flex;
+        gap: 20px;
+      }
+
+      .navbar-menu a {
+        color: white;
+        text-decoration: none;
+        padding: 15px 15px;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .navbar-menu a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .navbar-menu a.active {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Responsive navbar */
+      @media (max-width: 768px) {
+        .navbar-container {
+          flex-direction: column;
+          padding: 10px;
+        }
+
+        .navbar-brand {
+          margin-bottom: 10px;
+          margin-right: 0;
+        }
+
+        .navbar-menu {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <div id="loading" class="loading" style="display: none">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- New Navbar Section from Fraud Detector -->
+    <nav class="navbar">
+      <div class="navbar-container">
+        <div class="navbar-brand">
+          <i class="fas fa-shield-alt"></i>
+          <h1 style="font-weight: bold;">Trend Analysis</h1>
+        </div>
+        <div class="navbar-menu">
+          <a href="/" class="active"><i class="fas fa-home"></i> Home</a>
+          <a href="#" id="download-pdf" class="bg-white text-blue-600 hover:bg-blue-100">
+            <i class="fas fa-download"></i> Download Report
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Dashboard Overview Section -->
+    <section class="container mx-auto px-4 py-8">
+      <div class="flex flex-wrap -mx-4">
+        <!-- Overview Stats Cards -->
+        <div class="w-full md:w-1/3 px-4 mb-6">
+          <div class="bg-white rounded-lg card-shadow p-6 text-center">
+            <div class="text-blue-500 text-4xl mb-2">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <div
+              class="text-5xl font-bold text-gray-800 mb-2"
+              id="total-assignments"
+            >
+              0
+            </div>
+            <div class="text-gray-600">Total Assignments</div>
+          </div>
+        </div>
+        <div class="w-full md:w-1/3 px-4 mb-6">
+          <div class="bg-white rounded-lg card-shadow p-6 text-center">
+            <div class="text-red-500 text-4xl mb-2">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div
+              class="text-5xl font-bold text-gray-800 mb-2"
+              id="high-ai-count"
+            >
+              0
+            </div>
+            <div class="text-gray-600">High AI Detection</div>
+          </div>
+        </div>
+        <div class="w-full md:w-1/3 px-4 mb-6">
+          <div class="bg-white rounded-lg card-shadow p-6 text-center">
+            <div class="text-yellow-500 text-4xl mb-2">
+              <i class="fas fa-copy"></i>
+            </div>
+            <div
+              class="text-5xl font-bold text-gray-800 mb-2"
+              id="high-plagiarism-count"
+            >
+              0
+            </div>
+            <div class="text-gray-600">High Plagiarism</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Threshold Controls -->
+      <div class="bg-white rounded-lg card-shadow p-6 mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+          Analysis Thresholds
+        </h2>
+        <div class="flex flex-wrap -mx-2">
+          <div class="w-full md:w-1/2 px-2 mb-4">
+            <label class="block text-gray-700 mb-2" for="ai-threshold">
+              AI Content Detection Threshold (%)
+              <div class="tooltip ml-1">
+                <i class="fas fa-info-circle text-blue-500"></i>
+                <span class="tooltiptext"
+                  >Submissions with AI scores above this threshold are counted
+                  as high AI detection</span
+                >
+              </div>
+            </label>
+            <div class="flex items-center">
+              <input
+                type="range"
+                id="ai-threshold"
+                min="0"
+                max="100"
+                value="50"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <span
+                id="ai-threshold-value"
+                class="ml-3 text-gray-700 min-w-[40px]"
+                >50%</span
+              >
+            </div>
+          </div>
+          <div class="w-full md:w-1/2 px-2 mb-4">
+            <label class="block text-gray-700 mb-2" for="plagiarism-threshold">
+              Plagiarism Detection Threshold (%)
+              <div class="tooltip ml-1">
+                <i class="fas fa-info-circle text-blue-500"></i>
+                <span class="tooltiptext"
+                  >Submissions with plagiarism scores above this threshold are
+                  counted as high plagiarism</span
+                >
+              </div>
+            </label>
+            <div class="flex items-center">
+              <input
+                type="range"
+                id="plagiarism-threshold"
+                min="0"
+                max="100"
+                value="30"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <span
+                id="plagiarism-threshold-value"
+                class="ml-3 text-gray-700 min-w-[40px]"
+                >30%</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button
+            id="apply-thresholds"
+            class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors duration-300"
+          >
+            Apply Thresholds
+          </button>
+        </div>
+      </div>
+
+      <!-- Graph Tabs -->
+      <div class="bg-white rounded-lg card-shadow mb-8">
+        <div class="flex border-b">
+          <button
+            class="tab-button flex-1 py-4 px-6 font-medium text-center tab-active"
+            data-tab="summary"
+          >
+            Overall Summary
+          </button>
+          <button
+            class="tab-button flex-1 py-4 px-6 font-medium text-center"
+            data-tab="trends"
+          >
+            Trend Analysis
+          </button>
+        </div>
+        <div class="p-6">
+          <!-- Summary Tab Content -->
+          <div id="summary-tab" class="tab-content">
+            <div class="flex flex-wrap -mx-4">
+              <div class="w-full lg:w-1/2 px-4 mb-6">
+                <h3 class="text-lg font-semibold mb-4">
+                  AI Content Detection Summary
+                </h3>
+                <div class="h-64">
+                  <canvas id="aiChart"></canvas>
+                </div>
+              </div>
+              <div class="w-full lg:w-1/2 px-4 mb-6">
+                <h3 class="text-lg font-semibold mb-4">
+                  Plagiarism Detection Summary
+                </h3>
+                <div class="h-64">
+                  <canvas id="plagiarismChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trends Tab Content -->
+          <div id="trends-tab" class="tab-content hidden">
+            <h3 class="text-lg font-semibold mb-4">
+              Assignment Integrity Trends
+            </h3>
+            <div class="h-80">
+              <canvas id="trendsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assignment List Section -->
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Assignments</h2>
+      <div
+        id="assignments-container"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <!-- Assignment cards will be added here dynamically -->
+        <div class="col-span-full text-center text-gray-500 py-12">
+          <i class="fas fa-spinner fa-spin text-3xl mb-4"></i>
+          <p>Loading assignments...</p>
+        </div>
+      </div>
+    </section>
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize variables
+        let assignments = [];
+        let assignmentData = {};
+        let aiThreshold = 50;
+        let plagiarismThreshold = 30;
+        let aiChart, plagiarismChart, trendsChart;
+
+        // Show loading indicator
+        function showLoading() {
+          document.getElementById("loading").style.display = "flex";
+        }
+
+        // Hide loading indicator
+        function hideLoading() {
+          document.getElementById("loading").style.display = "none";
+        }
+
+        // Initialize threshold sliders
+        const aiThresholdSlider = document.getElementById("ai-threshold");
+        const aiThresholdValue = document.getElementById("ai-threshold-value");
+        const plagiarismThresholdSlider = document.getElementById(
+          "plagiarism-threshold"
+        );
+        const plagiarismThresholdValue = document.getElementById(
+          "plagiarism-threshold-value"
+        );
+
+        aiThresholdSlider.addEventListener("input", function () {
+          aiThresholdValue.textContent = this.value + "%";
+        });
+
+        plagiarismThresholdSlider.addEventListener("input", function () {
+          plagiarismThresholdValue.textContent = this.value + "%";
+        });
+
+        document
+          .getElementById("apply-thresholds")
+          .addEventListener("click", function () {
+            aiThreshold = parseInt(aiThresholdSlider.value);
+            plagiarismThreshold = parseInt(plagiarismThresholdSlider.value);
+            updateDashboard();
+          });
+
+        // Get all assignments from the database
+        function fetchAssignments() {
+          showLoading();
+
+          // Make an AJAX request to your backend API
+          fetch("/api/assignments")
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              // Process the data from the API
+              if (data.assignments) {
+                // Clear previous data
+                assignments = [];
+                assignmentData = {};
+
+                // Process the data from the API format to our local format
+                Object.entries(data.assignments).forEach(([key, value]) => {
+                  // Add to assignments array
+                  assignments.push(key);
+
+                  // Add to assignmentData object
+                  assignmentData[key] = value;
+                });
+
+                renderAssignments();
+                updateDashboard();
+              } else {
+                console.error("Invalid data format received from API");
+                document.getElementById("assignments-container").innerHTML =
+                  '<div class="col-span-full text-center text-gray-500 py-12"><p>Error loading data. Please try again later.</p></div>';
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching assignments:", error);
+              document.getElementById("assignments-container").innerHTML =
+                '<div class="col-span-full text-center text-gray-500 py-12"><p>Error loading data. Please try again later.</p></div>';
+            })
+            .finally(() => {
+              hideLoading();
+            });
+        }
+
+        // Render assignment cards
+        function renderAssignments() {
+          const container = document.getElementById("assignments-container");
+          container.innerHTML = "";
+
+          if (assignments.length === 0) {
+            container.innerHTML =
+              '<div class="col-span-full text-center text-gray-500 py-12"><p>No assignments found.</p></div>';
+            return;
+          }
+
+          assignments.forEach((assignment, index) => {
+            const data = assignmentData[assignment] || [];
+
+            // Count submissions above threshold
+            const totalSubmissions = data.length;
+            const highAICount = data.filter(
+              (item) => item.ai_percentage >= aiThreshold
+            ).length;
+            const highPlagiarismCount = data.filter(
+              (item) => item.plagiarism_percentage >= plagiarismThreshold
+            ).length;
+
+            // Calculate percentages
+            const aiPercentage = totalSubmissions
+              ? ((highAICount / totalSubmissions) * 100).toFixed(1)
+              : 0;
+            const plagiarismPercentage = totalSubmissions
+              ? ((highPlagiarismCount / totalSubmissions) * 100).toFixed(1)
+              : 0;
+
+            // Create assignment card
+            const card = document.createElement("div");
+            card.className =
+              "assignment-card bg-white rounded-lg card-shadow overflow-hidden";
+
+            // Card Header
+            const header = document.createElement("div");
+            header.className =
+              "p-4 border-b cursor-pointer assignment-header flex justify-between items-center";
+            header.innerHTML = `
+                <div>
+                    <h3 class="font-bold text-gray-800">${formatAssignmentName(
+                      assignment
+                    )}</h3>
+                    <div class="text-sm text-gray-600">${totalSubmissions} submissions</div>
+                </div>
+                <div class="text-gray-400">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            `;
+
+            // Card Stats
+            const stats = document.createElement("div");
+            stats.className = "p-4 bg-gray-50 grid grid-cols-2 gap-4";
+            stats.innerHTML = `
+                <div>
+                    <div class="text-xs text-gray-500">AI Content</div>
+                    <div class="text-lg font-semibold ${
+                      highAICount > 0 ? "text-red-600" : "text-green-600"
+                    }">
+                        ${aiPercentage}% (${highAICount}/${totalSubmissions})
+                    </div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500">Plagiarism</div>
+                    <div class="text-lg font-semibold ${
+                      highPlagiarismCount > 0
+                        ? "text-yellow-600"
+                        : "text-green-600"
+                    }">
+                        ${plagiarismPercentage}% (${highPlagiarismCount}/${totalSubmissions})
+                    </div>
+                </div>
+            `;
+
+            // Collapsible Content
+            const content = document.createElement("div");
+            content.className = "collapsible-content";
+
+            // Table Content
+            const tableContent = document.createElement("div");
+            tableContent.className = "p-4";
+
+            if (data.length === 0) {
+              tableContent.innerHTML =
+                '<p class="text-gray-500 text-center">No data available</p>';
+            } else {
+              let tableHTML = `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AI %</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plagiarism %</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                `;
+
+              data.forEach((item) => {
+                tableHTML += `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
+                              item.id
+                            }</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
+                              item.file_name
+                            }</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm ${
+                              item.ai_percentage >= aiThreshold
+                                ? "text-red-600 font-semibold"
+                                : "text-gray-900"
+                            }">${item.ai_percentage.toFixed(1)}%</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm ${
+                              item.plagiarism_percentage >= plagiarismThreshold
+                                ? "text-yellow-600 font-semibold"
+                                : "text-gray-900"
+                            }">${item.plagiarism_percentage.toFixed(1)}%</td>
+                        </tr>
+                    `;
+              });
+
+              tableHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+              tableContent.innerHTML = tableHTML;
+            }
+
+            content.appendChild(tableContent);
+
+            // Append card elements
+            card.appendChild(header);
+            card.appendChild(stats);
+            card.appendChild(content);
+            container.appendChild(card);
+
+            // Add click event to header
+            header.addEventListener("click", function () {
+              const icon = this.querySelector(".fas");
+              icon.classList.toggle("fa-chevron-down");
+              icon.classList.toggle("fa-chevron-up");
+              content.classList.toggle("expanded");
+            });
+          });
+        }
+
+        // Format assignment name
+        function formatAssignmentName(name) {
+          // If the name already has spaces, just return it
+          if (name.includes(" ")) {
+            return name;
+          }
+          // Otherwise replace underscores with spaces
+          return name.replace(/_/g, " ");
+        }
+
+        // Update dashboard stats and charts
+        function updateDashboard() {
+          let totalAssignments = assignments.length;
+          let totalHighAI = 0;
+          let totalHighPlagiarism = 0;
+          let assignmentLabels = [];
+          let aiData = [];
+          let plagiarismData = [];
+
+          // Calculate total counts
+          assignments.forEach((assignment) => {
+            const data = assignmentData[assignment] || [];
+            const highAICount = data.filter(
+              (item) => item.ai_percentage >= aiThreshold
+            ).length;
+            const highPlagiarismCount = data.filter(
+              (item) => item.plagiarism_percentage >= plagiarismThreshold
+            ).length;
+
+            totalHighAI += highAICount;
+            totalHighPlagiarism += highPlagiarismCount;
+
+            // Prepare data for charts
+            assignmentLabels.push(formatAssignmentName(assignment));
+            aiData.push(highAICount);
+            plagiarismData.push(highPlagiarismCount);
+          });
+
+          // Update dashboard stats
+          document.getElementById("total-assignments").textContent =
+            totalAssignments;
+          document.getElementById("high-ai-count").textContent = totalHighAI;
+          document.getElementById("high-plagiarism-count").textContent =
+            totalHighPlagiarism;
+
+          // Update charts
+          updateCharts(assignmentLabels, aiData, plagiarismData);
+
+          // Re-render assignments with new thresholds
+          renderAssignments();
+        }
+
+        // Initialize and update charts
+        function updateCharts(labels, aiData, plagiarismData) {
+          // Destroy existing charts if they exist
+          if (aiChart) aiChart.destroy();
+          if (plagiarismChart) plagiarismChart.destroy();
+          if (trendsChart) trendsChart.destroy();
+
+          // Create AI Detection Chart
+          const aiCtx = document.getElementById("aiChart").getContext("2d");
+          aiChart = new Chart(aiCtx, {
+            type: "bar",
+            data: {
+              labels: ["Low AI", "High AI"],
+              datasets: [
+                {
+                  label: "Submissions",
+                  data: [
+                    getTotalSubmissions() - aiData.reduce((a, b) => a + b, 0),
+                    aiData.reduce((a, b) => a + b, 0),
+                  ],
+                  backgroundColor: [
+                    "rgba(75, 192, 192, 0.6)",
+                    "rgba(255, 99, 132, 0.6)",
+                  ],
+                  borderColor: [
+                    "rgba(75, 192, 192, 1)",
+                    "rgba(255, 99, 132, 1)",
+                  ],
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const value = context.raw;
+                      const total = getTotalSubmissions();
+                      const percentage = ((value / total) * 100).toFixed(1);
+                      return `${value} submissions (${percentage}%)`;
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          // Create Plagiarism Chart
+          const plagiarismCtx = document
+            .getElementById("plagiarismChart")
+            .getContext("2d");
+          plagiarismChart = new Chart(plagiarismCtx, {
+            type: "bar",
+            data: {
+              labels: ["Low Plagiarism", "High Plagiarism"],
+              datasets: [
+                {
+                  label: "Submissions",
+                  data: [
+                    getTotalSubmissions() -
+                      plagiarismData.reduce((a, b) => a + b, 0),
+                    plagiarismData.reduce((a, b) => a + b, 0),
+                  ],
+                  backgroundColor: [
+                    "rgba(75, 192, 192, 0.6)",
+                    "rgba(255, 159, 64, 0.6)",
+                  ],
+                  borderColor: [
+                    "rgba(75, 192, 192, 1)",
+                    "rgba(255, 159, 64, 1)",
+                  ],
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const value = context.raw;
+                      const total = getTotalSubmissions();
+                      const percentage = ((value / total) * 100).toFixed(1);
+                      return `${value} submissions (${percentage}%)`;
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          // Create Trends Chart
+          const trendsCtx = document
+            .getElementById("trendsChart")
+            .getContext("2d");
+          trendsChart = new Chart(trendsCtx, {
+            type: "bar",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: "High AI Content",
+                  data: aiData,
+                  backgroundColor: "rgba(255, 99, 132, 0.6)",
+                  borderColor: "rgba(255, 99, 132, 1)",
+                  borderWidth: 1,
+                },
+                {
+                  label: "High Plagiarism",
+                  data: plagiarismData,
+                  backgroundColor: "rgba(255, 159, 64, 0.6)",
+                  borderColor: "rgba(255, 159, 64, 1)",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const value = context.raw;
+                      let total = 0;
+                      const dataIndex = context.dataIndex;
+                      const assignment = labels[dataIndex];
+                      const assignmentKey = assignments.find(
+                        (key) => formatAssignmentName(key) === assignment
+                      );
+
+                      if (assignmentKey) {
+                        total = assignmentData[assignmentKey].length;
+                      }
+
+                      const percentage = total
+                        ? ((value / total) * 100).toFixed(1)
+                        : 0;
+                      return `${value} submissions (${percentage}%)`;
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  grid: {
+                    display: false,
+                  },
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: "Number of Submissions",
+                  },
+                },
+              },
+            },
+          });
+          prepareChartsForExport();
+        }
+
+        // Get total number of submissions
+        function getTotalSubmissions() {
+          let total = 0;
+          Object.values(assignmentData).forEach((data) => {
+            total += data.length;
+          });
+          return total;
+        }
+
+        // Tab switching functionality
+        const tabButtons = document.querySelectorAll(".tab-button");
+        const tabContents = document.querySelectorAll(".tab-content");
+
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            // Remove active class from all tabs
+            tabButtons.forEach((btn) => btn.classList.remove("tab-active"));
+            tabContents.forEach((content) => content.classList.add("hidden"));
+
+            // Add active class to clicked tab
+            this.classList.add("tab-active");
+
+            // Show corresponding content
+            const tabId = this.getAttribute("data-tab");
+            document.getElementById(tabId + "-tab").classList.remove("hidden");
+          });
+        });
+
+        // Generate mock data for demo purposes
+        function generateMockData() {
+          const mockAssignments = {
+            Assignment_1: [],
+            Assignment_2: [],
+            Final_Project: [],
+            Midterm_Essay: [],
+            Research_Paper: [],
+          };
+
+          // Function to generate random submissions
+          const generateSubmissions = (count) => {
+            const submissions = [];
+            for (let i = 1; i <= count; i++) {
+              submissions.push({
+                id: `S${i.toString().padStart(3, "0")}`,
+                file_name: `submission_${i}.pdf`,
+                ai_percentage: Math.random() * 100,
+                plagiarism_percentage: Math.random() * 100,
+              });
+            }
+            return submissions;
+          };
+
+          // Generate random number of submissions for each assignment
+          mockAssignments["Assignment_1"] = generateSubmissions(25);
+          mockAssignments["Assignment_2"] = generateSubmissions(23);
+          mockAssignments["Final_Project"] = generateSubmissions(21);
+          mockAssignments["Midterm_Essay"] = generateSubmissions(24);
+          mockAssignments["Research_Paper"] = generateSubmissions(22);
+
+          return { assignments: mockAssignments };
+        }
+
+        // For demo purposes, use mock data
+        function fetchMockData() {
+          showLoading();
+
+          // Simulate network delay
+          setTimeout(() => {
+            const data = generateMockData();
+
+            // Process the mock data
+            if (data.assignments) {
+              // Clear previous data
+              assignments = [];
+              assignmentData = {};
+
+              // Process the data to our local format
+              Object.entries(data.assignments).forEach(([key, value]) => {
+                // Add to assignments array
+                assignments.push(key);
+
+                // Add to assignmentData object
+                assignmentData[key] = value;
+              });
+
+              renderAssignments();
+              updateDashboard();
+            }
+
+            hideLoading();
+          }, 1000);
+        }
+
+        document.getElementById('download-pdf').addEventListener('click', async function() {
+  showLoading();
+  
+  try {
+    // Get current thresholds and date for the report title
+    const currentAIThreshold = aiThresholdSlider.value;
+    const currentPlagiarismThreshold = plagiarismThresholdSlider.value;
+    const currentDate = new Date().toLocaleDateString();
+    
+    // Force render charts before capturing
+    await forceChartRender();
+    
+    // Initialize PDF with A4 size
+    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 15; // margin in mm
+    
+    // Available content area
+    const contentWidth = pageWidth - (2 * margin);
+    let yPosition = margin;
+    
+    // Add title and metadata
+    pdf.setFontSize(18);
+    pdf.setFont(undefined, 'bold');
+    const title = 'Trend Analysis - Academic Integrity Report';
+    pdf.text(title, pageWidth / 2, yPosition, { align: 'center' });
+    
+    yPosition += 10;
+    pdf.setFontSize(10);
+    pdf.setFont(undefined, 'normal');
+    pdf.setTextColor(100, 100, 100);
+    pdf.text(`Generated on ${currentDate}`, pageWidth / 2, yPosition, { align: 'center' });
+    
+    yPosition += 5;
+    pdf.text(`AI Threshold: ${currentAIThreshold}% | Plagiarism Threshold: ${currentPlagiarismThreshold}%`, 
+             pageWidth / 2, yPosition, { align: 'center' });
+    
+    yPosition += 8;
+    pdf.setDrawColor(200, 200, 200);
+    pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+    
+    // Overview Statistics section
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(14);
+    pdf.setFont(undefined, 'bold');
+    pdf.text('Overview Statistics', margin, yPosition);
+    yPosition += 8;
+    
+    // Instead of capturing stats cards, create custom stats section based on threshold
+    // Calculate total submissions and counts above threshold
+    let totalSubmissions = 0;
+    let highAICount = 0;
+    let highPlagiarismCount = 0;
+    
+    assignments.forEach((assignment) => {
+      const data = assignmentData[assignment] || [];
+      totalSubmissions += data.length;
+      
+      highAICount += data.filter(
+        (item) => item.ai_percentage >= currentAIThreshold
+      ).length;
+      
+      highPlagiarismCount += data.filter(
+        (item) => item.plagiarism_percentage >= currentPlagiarismThreshold
+      ).length;
+    });
+    
+    // Create icons using SVG for embedding in PDF
+    const documentIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#4285F4">
+        <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"/>
+        <path d="M14 2V8H20L14 2Z" fill="#4285F4"/>
+        <path d="M16 13H8V15H16V13Z" fill="white"/>
+        <path d="M16 17H8V19H16V17Z" fill="white"/>
+        <path d="M10 9H8V11H10V9Z" fill="white"/>
+      </svg>
+    `;
+    
+    const robotIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#DB4437">
+        <path d="M20 9V12C20 13.1 19.1 14 18 14H17V17H15V14H9V17H7V14H6C4.9 14 4 13.1 4 12V9H2V7H4V6C4 4.9 4.9 4 6 4H18C19.1 4 20 4.9 20 6V7H22V9H20Z"/>
+        <circle cx="8" cy="11" r="1" fill="white"/>
+        <circle cx="16" cy="11" r="1" fill="white"/>
+      </svg>
+    `;
+    
+    const plagiarismIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#F4B400">
+        <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1Z"/>
+        <path d="M19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5Z"/>
+        <path d="M9 11H18V9H9V11Z" fill="white"/>
+        <path d="M9 14H18V12H9V14Z" fill="white"/>
+        <path d="M9 17H18V15H9V17Z" fill="white"/>
+      </svg>
+    `;
+    
+    // Function to add SVG to PDF
+    async function addSvgToPdf(svg, x, y, width, height) {
+      // Create a temporary element to render the SVG
+      const svgContainer = document.createElement('div');
+      svgContainer.innerHTML = svg;
+      svgContainer.style.width = '48px';
+      svgContainer.style.height = '48px';
+      svgContainer.style.position = 'absolute';
+      svgContainer.style.top = '-1000px';
+      document.body.appendChild(svgContainer);
+      
+      // Use html2canvas to capture the SVG
+      const canvas = await html2canvas(svgContainer, {
+        scale: 4,
+        logging: false,
+        useCORS: true,
+        backgroundColor: null
+      });
+      
+      document.body.removeChild(svgContainer);
+      
+      // Add the canvas to PDF
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', x, y, width, height);
+    }
+    
+    // Draw custom stats boxes
+    const boxWidth = contentWidth / 3;
+    const boxHeight = 40;
+    const boxPadding = 5;
+    const iconSize = 10;
+    
+    // Box 1: Total Assignments
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(margin, yPosition, boxWidth - boxPadding, boxHeight, 'F');
+    
+    await addSvgToPdf(documentIcon, margin + (boxWidth - boxPadding) / 2 - iconSize, yPosition + 5, iconSize * 2, iconSize * 2);
+    
+    pdf.setFontSize(18);
+    pdf.setFont(undefined, 'bold');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(assignments.length.toString(), margin + (boxWidth - boxPadding) / 2, yPosition + 28, { align: 'center' });
+    
+    pdf.setFontSize(10);
+    pdf.setFont(undefined, 'normal');
+    pdf.text('Total Assignments', margin + (boxWidth - boxPadding) / 2, yPosition + 36, { align: 'center' });
+    
+    // Box 2: High AI Detection
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(margin + boxWidth, yPosition, boxWidth - boxPadding, boxHeight, 'F');
+    
+    await addSvgToPdf(robotIcon, margin + boxWidth + (boxWidth - boxPadding) / 2 - iconSize, yPosition + 5, iconSize * 2, iconSize * 2);
+    
+    pdf.setFontSize(18);
+    pdf.setFont(undefined, 'bold');
+    pdf.text(highAICount.toString(), margin + boxWidth + (boxWidth - boxPadding) / 2, yPosition + 28, { align: 'center' });
+    
+    pdf.setFontSize(10);
+    pdf.setFont(undefined, 'normal');
+    pdf.text('High AI Detection', margin + boxWidth + (boxWidth - boxPadding) / 2, yPosition + 36, { align: 'center' });
+    
+    // Box 3: High Plagiarism
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(margin + boxWidth * 2, yPosition, boxWidth - boxPadding, boxHeight, 'F');
+    
+    await addSvgToPdf(plagiarismIcon, margin + boxWidth * 2 + (boxWidth - boxPadding) / 2 - iconSize, yPosition + 5, iconSize * 2, iconSize * 2);
+    
+    pdf.setFontSize(18);
+    pdf.setFont(undefined, 'bold');
+    pdf.text(highPlagiarismCount.toString(), margin + boxWidth * 2 + (boxWidth - boxPadding) / 2, yPosition + 28, { align: 'center' });
+    
+    pdf.setFontSize(10);
+    pdf.setFont(undefined, 'normal');
+    pdf.text('High Plagiarism', margin + boxWidth * 2 + (boxWidth - boxPadding) / 2, yPosition + 36, { align: 'center' });
+    
+    yPosition += boxHeight + 20;
+    
+    // Function to add a chart to PDF and handle pagination
+    async function addChartToPDF(elementId, chartTitle) {
+      // Check if we need a new page - leaving extra room to ensure chart stays together
+      if (yPosition + 150 > pageHeight - margin) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+      
+      // Add chart title
+      pdf.setFontSize(14);
+      pdf.setFont(undefined, 'bold');
+      pdf.text(chartTitle, margin, yPosition);
+      yPosition += 8;
+      
+      const chartElement = document.getElementById(elementId).parentNode;
+      const chartCanvas = await html2canvas(chartElement, {
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+      
+      const chartImgData = chartCanvas.toDataURL('image/jpeg', 0.95);
+      const chartImgWidth = contentWidth;
+      const chartImgHeight = (chartCanvas.height * contentWidth) / chartCanvas.width;
+      
+      // Check if chart would overflow page
+      if (yPosition + chartImgHeight > pageHeight - margin) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+      
+      pdf.addImage(chartImgData, 'JPEG', margin, yPosition, chartImgWidth, chartImgHeight);
+      yPosition += chartImgHeight + 15;
+    }
+    
+    // Add Analysis Charts section title
+    if (yPosition + 150 > pageHeight - margin) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+    
+    pdf.setFontSize(14);
+    pdf.setFont(undefined, 'bold');
+    pdf.text('Analysis Charts', margin, yPosition);
+    yPosition += 10;
+    
+    // Add AI Chart
+    await addChartToPDF('aiChart', 'AI Content Detection Summary');
+    
+    // Add Plagiarism Chart
+    await addChartToPDF('plagiarismChart', 'Plagiarism Detection Summary');
+    
+    // For trend analysis chart, make it visible temporarily
+    const trendsTab = document.getElementById('trends-tab');
+    const trendsTabWasHidden = trendsTab.classList.contains('hidden');
+    if (trendsTabWasHidden) {
+      trendsTab.classList.remove('hidden');
+      // Force the trend chart to render
+      trendsChart.render();
+      // Wait for rendering
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+    
+    await addChartToPDF('trendsChart', 'Assignment Integrity Trends');
+    
+    // Restore trends tab visibility
+    if (trendsTabWasHidden) {
+      trendsTab.classList.add('hidden');
+    }
+    
+    // Add Assignment Details section
+    // Make sure that the section title and table header fit on the same page
+    if (yPosition + 50 > pageHeight - margin) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+    
+    pdf.setFontSize(14);
+    pdf.setFont(undefined, 'bold');
+    pdf.text('Assignment Details', margin, yPosition);
+    yPosition += 10;
+    
+    // Create assignment table
+    // Table headers
+    const headers = [['Assignment', 'Submissions', 'AI Content', 'Plagiarism']];
+    const tableData = [];
+    
+    // Process each assignment exactly as in your original code
+    assignments.forEach((assignment) => {
+      const data = assignmentData[assignment] || [];
+      
+      // Count submissions above threshold
+      const totalSubmissions = data.length;
+      const highAICount = data.filter(
+        (item) => item.ai_percentage >= currentAIThreshold
+      ).length;
+      const highPlagiarismCount = data.filter(
+        (item) => item.plagiarism_percentage >= currentPlagiarismThreshold
+      ).length;
+      
+      // Calculate percentages
+      const aiPercentage = totalSubmissions
+        ? ((highAICount / totalSubmissions) * 100).toFixed(1)
+        : 0;
+      const plagiarismPercentage = totalSubmissions
+        ? ((highPlagiarismCount / totalSubmissions) * 100).toFixed(1)
+        : 0;
+      
+      // Add row to table data
+      tableData.push([
+        formatAssignmentName(assignment),
+        totalSubmissions.toString(),
+        `${aiPercentage}% (${highAICount}/${totalSubmissions})`,
+        `${plagiarismPercentage}% (${highPlagiarismCount}/${totalSubmissions})`
+      ]);
+    });
+    
+    // If jspdf-autotable is available
+    if (typeof pdf.autoTable === 'function') {
+      pdf.autoTable({
+        head: headers,
+        body: tableData,
+        startY: yPosition,
+        margin: { left: margin, right: margin },
+        styles: { overflow: 'linebreak', cellPadding: 4 },
+        headStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0], fontStyle: 'bold' },
+        columnStyles: {
+          0: { cellWidth: 55 },
+          1: { cellWidth: 25, halign: 'center' },
+          2: { cellWidth: 40, halign: 'center' },
+          3: { cellWidth: 40, halign: 'center' }
+        },
+        // Add a more intelligent page break to avoid breaking rows between pages
+        didDrawPage: function(data) {
+          // Reset y position after page break
+          yPosition = data.cursor.y;
+        }
+      });
+    } else {
+      // Fallback if autoTable is not available
+      // Create a simple table using jspdf functions
+      const cellHeight = 10;
+      const colWidths = [55, 25, 40, 40];
+      let tableY = yPosition;
+      
+      // Draw header
+      pdf.setFillColor(243, 244, 246);
+      pdf.rect(margin, tableY, contentWidth, cellHeight, 'F');
+      pdf.setFont(undefined, 'bold');
+      pdf.setFontSize(10);
+      
+      let xOffset = margin;
+      headers[0].forEach((header, i) => {
+        pdf.text(header, xOffset + 2, tableY + 6);
+        xOffset += colWidths[i];
+      });
+      
+      tableY += cellHeight;
+      
+      // Draw rows
+      pdf.setFont(undefined, 'normal');
+      for (let i = 0; i < tableData.length; i++) {
+        // Check if we need a new page - with more space to ensure row isn't split
+        if (tableY + cellHeight * 2 > pageHeight - margin) {
+          pdf.addPage();
+          tableY = margin;
+          
+          // Redraw header on new page
+          pdf.setFillColor(243, 244, 246);
+          pdf.rect(margin, tableY, contentWidth, cellHeight, 'F');
+          pdf.setFont(undefined, 'bold');
+          
+          xOffset = margin;
+          headers[0].forEach((header, j) => {
+            pdf.text(header, xOffset + 2, tableY + 6);
+            xOffset += colWidths[j];
+          });
+          
+          tableY += cellHeight;
+          pdf.setFont(undefined, 'normal');
+        }
+        
+        // Draw row
+        pdf.setDrawColor(220, 220, 220);
+        pdf.line(margin, tableY, margin + contentWidth, tableY);
+        
+        xOffset = margin;
+        tableData[i].forEach((cell, j) => {
+          // Use color for AI and Plagiarism cells
+          if (j === 2 || j === 3) {
+            const value = parseFloat(cell);
+            if (value > 0) {
+              pdf.setTextColor(j === 2 ? 230 : 255, j === 2 ? 57 : 160, j === 2 ? 70 : 0);
+            } else {
+              pdf.setTextColor(67, 160, 71);
+            }
+          } else {
+            pdf.setTextColor(0, 0, 0);
+          }
+          
+          // Bold the assignment name
+          if (j === 0) pdf.setFont(undefined, 'bold');
+          else pdf.setFont(undefined, 'normal');
+          
+          const align = j === 0 ? 'left' : 'center';
+          const textX = align === 'center' ? xOffset + (colWidths[j] / 2) : xOffset + 2;
+          pdf.text(cell, textX, tableY + 6, { align: align });
+          
+          xOffset += colWidths[j];
+        });
+        
+        tableY += cellHeight;
+      }
+      
+      pdf.setTextColor(0, 0, 0);
+    }
+    
+    // Save the PDF
+    pdf.save(`academic_integrity_report_${new Date().toISOString().slice(0,10)}.pdf`);
+    
+    hideLoading();
+    
+  } catch (error) {
+    console.error("Error preparing report:", error);
+    hideLoading();
+    alert("Error generating report: " + error.message);
+  }
+});
+
+// Function to force all charts to render for the PDF
+function prepareChartsForExport() {
+  // Force render of all charts
+  if (aiChart) aiChart.render();
+  if (plagiarismChart) plagiarismChart.render();
+  if (trendsChart) trendsChart.render();
+}
+
+function forceChartRender() {
+  if (aiChart) aiChart.render();
+  if (plagiarismChart) plagiarismChart.render();
+  if (trendsChart) trendsChart.render();
+  return new Promise(resolve => setTimeout(resolve, 500)); // Give time for rendering
+}
+
+function renderAllCharts() {
+  // Show both tabs temporarily to ensure all charts render
+  const summaryTab = document.getElementById('summary-tab');
+  const trendsTab = document.getElementById('trends-tab');
+  
+  // Store original states
+  const summaryWasHidden = summaryTab.classList.contains('hidden');
+  const trendsWasHidden = trendsTab.classList.contains('hidden');
+  
+  // Make both visible
+  summaryTab.classList.remove('hidden');
+  trendsTab.classList.remove('hidden');
+  
+  // Force render all charts
+  if (aiChart) aiChart.render();
+  if (plagiarismChart) plagiarismChart.render();
+  if (trendsChart) trendsChart.render();
+  
+  // Allow time for rendering
+  return new Promise(resolve => {
+    setTimeout(() => {
+      // Restore original visibility states
+      if (summaryWasHidden) summaryTab.classList.add('hidden');
+      if (trendsWasHidden) trendsTab.classList.add('hidden');
+      resolve();
+    }, 500);
+  });
+}
+
+// You need to call this function from within an async function, for example:
+document.getElementById('download-pdf').addEventListener('click', async function() {
+  // Other existing code...
+  
+  // Call renderAllCharts before generating the PDF
+  await renderAllCharts();
+  
+  // Continue with PDF generation
+  // ...
+});
+
+        // Initialize the dashboard
+        // Uncomment the real API call in production
+        fetchAssignments();
+
+        // Use mock data for demo
+        // fetchMockData();
+      }); // This is the missing closing brace for the DOMContentLoaded event listener
+    </script>
+  </body>
+</html>
